@@ -285,21 +285,6 @@ Ember.Model = Ember.Object.extend(Ember.Evented, {
       data[this.dataKey(key)] = this.cacheFor(key);
     }
     set(this, '_dirtyAttributes', []);
-    this._resetDirtyStateInNestedObjects(this); // we need to reset isDirty state to all child objects in embedded HasMany arrays
-  },
-
-  _resetDirtyStateInNestedObjects: function(object) {
-    if (!object._hasManyArrays) { return; }
-    for (var i = 0; i < object._hasManyArrays.length; i++) {
-      var array = object._hasManyArrays[i];
-      if (array.embedded) {
-        array._setupOriginalContent();
-        for (var j = 0; j < array.get('length'); j++) {
-          set(array.objectAt(j),'_dirtyAttributes', []);
-          this._resetDirtyStateInNestedObjects(array.objectAt(j));
-        }
-      }
-    }
   },
 
   dataDidChange: Ember.observer(function() {
@@ -319,11 +304,11 @@ Ember.Model = Ember.Object.extend(Ember.Evented, {
       var array = this._hasManyArrays[i],
           hasManyContent = this._getHasManyContent(get(array, 'key'), get(array, 'modelClass'), get(array, 'embedded'));
         for (j = 0; j < array.get('length'); j++) {
-          if (array.objectAt(j).get('isNew') && !array.objectAt(j).get('isDeleted')) {
+          if (array.objectAt(j).get('isNew')) {
             hasManyContent.addObject(array.objectAt(j)._reference);
           }
         }
-      array.load(hasManyContent);
+      set(array, 'content', hasManyContent);
     }
   },
 
@@ -616,10 +601,7 @@ Ember.Model.reopenClass({
   },
 
   cachedRecordForId: function(id, container) {
-    var record;
-    if (!this.transient) {
-      record = this.getCachedReferenceRecord(id, container);
-    }
+    var record = this.getCachedReferenceRecord(id, container);
 
     if (!record) {
       var primaryKey = get(this, 'primaryKey'),
@@ -627,11 +609,9 @@ Ember.Model.reopenClass({
       attrs[primaryKey] = id;
       attrs.container = container;
       record = this.create(attrs);
-      if (!this.transient) {
-        var sideloadedData = this.sideloadedData && this.sideloadedData[id];
-        if (sideloadedData) {
-          record.load(id, sideloadedData);
-        }
+      var sideloadedData = this.sideloadedData && this.sideloadedData[id];
+      if (sideloadedData) {
+        record.load(id, sideloadedData);
       }
     }
 
@@ -664,7 +644,6 @@ Ember.Model.reopenClass({
   clearCache: function () {
     this.sideloadedData = undefined;
     this._referenceCache = undefined;
-    this._findAllRecordArray = undefined;
   },
 
   removeFromCache: function (key) {

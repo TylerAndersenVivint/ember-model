@@ -1,4 +1,4 @@
-var Model;
+var Model, container;
 
 function ajaxSuccess(data) {
   return new Ember.RSVP.Promise(function(resolve, reject) {
@@ -18,6 +18,7 @@ module("Ember.RecordArray", {
       {id: 2, name: 'Stefan'},
       {id: 3, name: 'Kris'}
     ];
+    container = new Ember.Container();
   },
   teardown: function() { }
 });
@@ -27,6 +28,21 @@ module("Ember.RecordArray", {
 //     Ember.RecordArray.create();
 //   }, /RecordArrays must be created with a modelClass/);
 // });
+
+test("load creates records with container when container exists", function() {
+  var records = Ember.RecordArray.create({modelClass: Model, container: container});
+  Ember.run(records, records.load, Model, Model.FIXTURES);
+  records.forEach(function(record){
+    ok(record.get('isLoaded'));
+    ok(record.get('container'));
+  });
+
+ /* stop();
+  records.one('didLoad', function() {
+    start();
+    equal(records.get('length'), 3);
+  });*/
+});
 
 test("when called with findMany, should contain an array of the IDs contained in the RecordArray", function() {
   var records = Ember.run(Model, Model.find, [1,2,3]);
@@ -55,7 +71,7 @@ test("findAll RecordArray implements reload", function() {
       }),
       adapter = Ember.RESTAdapter.create(),
       records, changed;
-  
+
   RESTModel.url = '/fake/api';
   RESTModel.adapter = adapter;
 
@@ -95,7 +111,7 @@ test("findQuery RecordArray implements reload", function() {
       }),
       adapter = Ember.RESTAdapter.create(),
       records, changed;
-  
+
   RESTModel.url = '/fake/api';
   RESTModel.adapter = adapter;
 
@@ -135,7 +151,7 @@ test("findMany RecordArray implements reload", function() {
       }),
       adapter = Ember.RESTAdapter.create(),
       records, changed;
-  
+
   RESTModel.url = '/fake/api';
   RESTModel.adapter = adapter;
 
@@ -179,7 +195,7 @@ test("reload handles record removal", function() {
       }),
       adapter = Ember.RESTAdapter.create(),
       records, changed;
-  
+
   RESTModel.url = '/fake/api';
   RESTModel.adapter = adapter;
 

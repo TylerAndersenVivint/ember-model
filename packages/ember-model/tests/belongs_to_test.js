@@ -373,38 +373,6 @@ test("setting existing nonembedded relationship should make parent dirty", funct
   ok(post.get('isDirty'));
 });
 
-test("setting existing nonembedded relationship to NULL should make parent dirty", function() {
-  expect(1);
-
-  var Author = Ember.Model.extend({
-        id: Ember.attr(),
-        name: Ember.attr()
-      }),
-      Post = Ember.Model.extend({
-        id: Ember.attr(),
-        author: Ember.belongsTo(Author, {key: 'author_id'})
-      });
-
-  Post.adapter = Ember.FixtureAdapter.create();
-  Author.adapter = Ember.FixtureAdapter.create();
-
-  var post = Post.create(),
-      author = Author.create(),
-      secondAuthor = Author.create();
-
-  Ember.run(function() {
-    author.load(100, {id: 100, name: 'bob'});
-    secondAuthor.load(101, {id: 101, name: 'ray'});
-    post.load(1, {id: 1, author_id: 100});
-  });
-
-  Ember.run(function() {
-    post.set('author', null);
-  });
-
-  ok(post.get('isDirty'));
-});
-
 test("relationships should be seralized when specified with string", function() {
   expect(1);
 
@@ -460,10 +428,10 @@ test("belongsTo from an embedded source is able to materialize without having to
     projects:[{
           id: 1,
           title: 'project one title',
-          company: 1,
-          posts: [{id: 1, title: 'title', body: 'body', project:1 },
+          company: 1, 
+          posts: [{id: 1, title: 'title', body: 'body', project:1 }, 
                   {id: 2, title: 'title two', body: 'body two', project:1 }]
-      }]
+      }] 
     };
 
   Company.load([compJson]);
@@ -471,7 +439,7 @@ test("belongsTo from an embedded source is able to materialize without having to
 
   equal(company.get('projects.length'), 1);
   equal(company.get('projects.firstObject.posts.length'), 2);
-
+  
   var project1 = company.get('projects.firstObject');
   equal(company, project1.get('company'));
 
@@ -498,12 +466,12 @@ test("unloaded records are removed from reference cache", function() {
     id:1,
     title:'coolio',
     projects:[{ id: 1, title: 'project one title', company: 1 },
-              { id: 2, title: 'project two title', company: 1 }]
+              { id: 2, title: 'project two title', company: 1 }]  
     }, compJson2 = {
     id:1,
     title:'coolio',
     projects:[{ id: 1, title: 'project one new title', company: 1 },
-              { id: 2, title: 'project two new title', company: 1 }]
+              { id: 2, title: 'project two new title', company: 1 }]  
     };
 
   Company.load([compJson]);
@@ -547,7 +515,7 @@ test("belongsTo records created are available from reference cache", function() 
     project:{
           id: 1,
           title: 'project one title',
-          company: 1
+          company: 1 
       }
     };
 
