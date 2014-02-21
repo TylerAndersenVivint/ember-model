@@ -1,9 +1,9 @@
 var get = Ember.get,
     set = Ember.set;
 
-function getType() {
+function getType(self) {
   if (typeof this.type === "string") {
-    this.type =  Ember.get(Ember.lookup, this.type);
+    this.type =  Ember.get(Ember.lookup, this.type) || self.container.lookupFactory(this.type);
   }
   return this.type;
 }
@@ -15,7 +15,7 @@ Ember.belongsTo = function(type, options) {
       relationshipKey = options.key;
 
   return Ember.computed(function(key, value, oldValue) {
-    type = meta.getType();
+    type = meta.getType(this);
 
     var dirtyAttributes = get(this, '_dirtyAttributes'),
         createdDirtyAttributes = false;
@@ -43,7 +43,7 @@ Ember.belongsTo = function(type, options) {
         set(this, '_dirtyAttributes', dirtyAttributes);
       }
 
-      return value === undefined ? null : value;  
+      return value === undefined ? null : value;
     } else {
       return this.getBelongsTo(relationshipKey, type, meta);
     }

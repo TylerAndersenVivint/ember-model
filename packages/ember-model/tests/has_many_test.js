@@ -84,6 +84,25 @@ test("model can be specified with a string instead of a class", function() {
   equal(Ember.run(article, article.get, 'comments.firstObject.token'), 'a');
 });
 
+test("model can be specified with a string to a resolved path", function() {
+   var container = new Ember.Container();
+   var Article = Ember.Model.extend({
+       comments: Ember.hasMany('Ember.CommentModel', { key: 'comments', embedded: true })
+     });
+   container.register('model:article', Article);
+   var Comment = Ember.CommentModel = Ember.Model.extend({
+       token: Ember.attr(String)
+     });
+
+   Comment.primaryKey = 'token';
+
+   var article = Article.create({container: container});
+   Ember.run(article, article.load, 1, {comments: Ember.A([{token: 'a'}, {token: 'b'}])});
+
+   equal(article.get('comments.length'), 2);
+   equal(Ember.run(article, article.get, 'comments.firstObject.token'), 'a');
+ });
+
 test("when fetching an association getHasMany is called", function() {
   expect(4);
 
@@ -177,10 +196,10 @@ test("has many records created are available from reference cache", function() {
     projects:[{
           id: 1,
           title: 'project one title',
-          company: 1, 
-          posts: [{id: 1, title: 'title', body: 'body', project:1 }, 
+          company: 1,
+          posts: [{id: 1, title: 'title', body: 'body', project:1 },
                   {id: 2, title: 'title two', body: 'body two', project:1 }]
-      }] 
+      }]
     };
 
   Company.load([compJson]);

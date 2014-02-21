@@ -1,4 +1,4 @@
-var Model;
+var Model, container;
 
 module("Ember.FilteredRecordArray", {
   setup: function() {
@@ -12,6 +12,7 @@ module("Ember.FilteredRecordArray", {
       {id:     2, name: 'Stefan'},
       {id: 'abc', name: 'Charles'}
     ];
+    container = new Ember.Container();
   },
   teardown: function() { }
 });
@@ -51,6 +52,15 @@ test("with a noop filter will return all the loaded records", function() {
   });
 
   stop();
+});
+
+test("load creates records with container when container exists", function() {
+   var records = Ember.RecordArray.create({modelClass: Model, container: container});
+   Ember.run(records, records.load, Model, Model.FIXTURES);
+   records.forEach(function(record){
+     ok(record.get('isLoaded'));
+     ok(record.get('container'));
+   });
 });
 
 test("with a filter will return only the relevant loaded records", function() {

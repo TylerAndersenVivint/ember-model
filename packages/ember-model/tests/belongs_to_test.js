@@ -52,6 +52,26 @@ test("model can be specified with a string instead of a class", function() {
   ok(article instanceof Article);
 });
 
+test("model can be specified with a string to a resolved path", function() {
+  var container = new Ember.Container();
+  var Article = Ember.ArticleModel = Ember.Model.extend({
+      slug: Ember.attr(String)
+    });
+  container.register('model:article', Article);
+  var Comment = Ember.Model.extend({
+      article: Ember.belongsTo('model:article', { key: 'article', embedded: true })
+    });
+
+  Article.primaryKey = 'slug';
+
+  var comment = Comment.create({container: container});
+  Ember.run(comment, comment.load, 1, { article: { slug: 'first-article' } });
+  var article = Ember.run(comment, comment.get, 'article');
+
+  equal(article.get('slug'), 'first-article');
+  ok(article instanceof Article);
+});
+
 test("non embedded belongsTo should get a record by its id", function() {
   var Article = Ember.Model.extend({
         slug: Ember.attr(String)
@@ -440,10 +460,10 @@ test("belongsTo from an embedded source is able to materialize without having to
     projects:[{
           id: 1,
           title: 'project one title',
-          company: 1, 
-          posts: [{id: 1, title: 'title', body: 'body', project:1 }, 
+          company: 1,
+          posts: [{id: 1, title: 'title', body: 'body', project:1 },
                   {id: 2, title: 'title two', body: 'body two', project:1 }]
-      }] 
+      }]
     };
 
   Company.load([compJson]);
@@ -451,7 +471,7 @@ test("belongsTo from an embedded source is able to materialize without having to
 
   equal(company.get('projects.length'), 1);
   equal(company.get('projects.firstObject.posts.length'), 2);
-  
+
   var project1 = company.get('projects.firstObject');
   equal(company, project1.get('company'));
 
@@ -478,12 +498,12 @@ test("unloaded records are removed from reference cache", function() {
     id:1,
     title:'coolio',
     projects:[{ id: 1, title: 'project one title', company: 1 },
-              { id: 2, title: 'project two title', company: 1 }]  
+              { id: 2, title: 'project two title', company: 1 }]
     }, compJson2 = {
     id:1,
     title:'coolio',
     projects:[{ id: 1, title: 'project one new title', company: 1 },
-              { id: 2, title: 'project two new title', company: 1 }]  
+              { id: 2, title: 'project two new title', company: 1 }]
     };
 
   Company.load([compJson]);
@@ -527,7 +547,7 @@ test("belongsTo records created are available from reference cache", function() 
     project:{
           id: 1,
           title: 'project one title',
-          company: 1 
+          company: 1
       }
     };
 

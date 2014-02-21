@@ -8,7 +8,7 @@ Ember.hasMany = function(type, options) {
 
   return Ember.computed(function() {
     if (typeof type === "string") {
-      type = Ember.get(Ember.lookup, type);
+      type = Ember.get(Ember.lookup, type) || this.container.lookupFactory(this.type);
     }
 
     return this.getHasMany(key, type, meta);
